@@ -138,7 +138,7 @@ Footer content should never overlap with metric values.
 The renderer should use the existing telemetry row with the following display priority:
 
 - provider / ISP: derive from `isp_info.processedString` when valid and non-empty
-- location/server context: derive from the same parsed `isp_info` payload when a human-friendly location is available; otherwise omit this slot instead of inventing content
+- location/server context: first derive from parsed `isp_info` when a human-friendly location is available; if that is unavailable, fall back to a concise server/context value from parsed `extra` when trustworthy and human-readable; otherwise omit this slot instead of inventing content
 - IP display: use a shortened version of `ip_address` only if it fits the footer cleanly; otherwise omit it
 - timestamp: use the existing telemetry timestamp converted through the current local-time helper
 - attribution: always show a small Nexio/LibreSpeed attribution string
@@ -207,7 +207,7 @@ The important requirement is that the developer can generate a dummy image after
 
 - `/backend/results?id=<uuid>` still resolves through the existing route shape
 - the generated result image is visually larger and less cramped than the current version
-- the generated result image uses the fixed `1200x720` contract or another explicitly documented equivalent chosen during implementation
+- the generated result image uses the fixed `1200x720` contract
 - the card uses a dark Nexio-aligned portal style with accent color
 - download/upload are clearly primary and ping/jitter are clearly secondary
 - metadata/footer content no longer overlaps or crowds the main metrics
