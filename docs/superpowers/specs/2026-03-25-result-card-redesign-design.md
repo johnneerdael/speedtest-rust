@@ -25,7 +25,7 @@ This design does not cover:
 
 The current frontend only links to the result image:
 
-- `assets/index.html` builds `/backend/results/?id=<uuid>` and assigns it to `resultsImg`
+- `assets/index.html` builds `/backend/results?id=<uuid>` and assigns it to `resultsImg`
 
 The backend image is generated in Rust:
 
@@ -51,6 +51,22 @@ The redesign should stay in the rendering layer:
 
 The response type may change from JPEG to PNG if that improves crispness for text and gradients without changing the route contract.
 
+## Image Contract
+
+The redesigned share output should move from the current cramped `500x286` raster to a larger fixed card:
+
+- target canvas: `1200x720`
+- aspect ratio: `5:3`
+- outer safe margin: `48px`
+- header band height: approximately `120px`
+- footer band height: approximately `110px`
+- primary metric row height: approximately `250px`
+- secondary metric row height: approximately `140px`
+
+The layout should be centered within those bounds and should avoid placing text closer than `32px` to card edges or section boundaries.
+
+Acceptance for spacing should be based on these constraints rather than subjective interpretation alone.
+
 ## Visual Direction
 
 The new result card should align with the Nexio portal, but feel stronger and more shareable than the page itself:
@@ -72,6 +88,8 @@ The selected direction is a larger version of the “balanced portal card” con
 - secondary metric row for ping and jitter
 - footer metadata band
 
+Within the fixed `1200x720` canvas, the card should render as one full-bleed branded composition rather than a smaller card floating inside a larger blank image.
+
 ### Header
 
 The header should include:
@@ -81,6 +99,11 @@ The header should include:
 - timestamp aligned opposite the title block
 
 The header should feel like a compact portal top bar, not a generic watermark strip.
+
+The recommended header content is:
+
+- left: Nexio monogram treatment plus title
+- right: formatted timestamp
 
 ### Primary Metrics
 
@@ -110,6 +133,18 @@ The footer should hold metadata in a more deliberate way:
 
 Footer content should never overlap with metric values.
 
+## Metadata Mapping Rules
+
+The renderer should use the existing telemetry row with the following display priority:
+
+- provider / ISP: derive from `isp_info.processedString` when valid and non-empty
+- location/server context: derive from the same parsed `isp_info` payload when a human-friendly location is available; otherwise omit this slot instead of inventing content
+- IP display: use a shortened version of `ip_address` only if it fits the footer cleanly; otherwise omit it
+- timestamp: use the existing telemetry timestamp converted through the current local-time helper
+- attribution: always show a small Nexio/LibreSpeed attribution string
+
+If there is not enough trustworthy data to fill a footer slot, the slot should collapse cleanly instead of displaying placeholders like `null`, empty separators, or raw JSON.
+
 ## Data Handling
 
 The renderer should continue using the existing telemetry row as its source. No schema changes are required for the redesign.
@@ -122,6 +157,12 @@ The implementation may normalize or trim long strings for display purposes, espe
 
 If a field is missing or overly long, the renderer should degrade gracefully without breaking the card layout.
 
+The renderer must also handle malformed stored data safely:
+
+- invalid or partially missing `isp_info` JSON must not panic the route
+- invalid or partially missing `extra` JSON must not panic the route
+- malformed data should fall back to omission or a simpler footer layout rather than aborting image generation
+
 ## Image Encoding
 
 The preferred output format is PNG instead of JPEG for this redesigned card because:
@@ -131,6 +172,18 @@ The preferred output format is PNG instead of JPEG for this redesigned card beca
 - dark UI surfaces and thin lines hold up better
 
 If the backend response helper currently assumes JPEG, the response path should be updated consistently with the new renderer output.
+
+## Branding And Icons
+
+The redesign should not depend on fetching external assets at render time.
+
+The implementation strategy should be:
+
+- use text-only branding or a simple procedurally drawn monogram block for Nexio identity
+- draw metric icons procedurally using simple shapes, arrows, rings, or glyph-compatible characters
+- keep attribution text-based in the footer
+
+Bundling additional local raster or vector assets is optional, but not required for the first implementation. The baseline implementation should be achievable with the existing bundled font and programmatic drawing primitives.
 
 ## Dummy Image Validation
 
@@ -154,9 +207,10 @@ The important requirement is that the developer can generate a dummy image after
 
 - `/backend/results?id=<uuid>` still resolves through the existing route shape
 - the generated result image is visually larger and less cramped than the current version
+- the generated result image uses the fixed `1200x720` contract or another explicitly documented equivalent chosen during implementation
 - the card uses a dark Nexio-aligned portal style with accent color
 - download/upload are clearly primary and ping/jitter are clearly secondary
 - metadata/footer content no longer overlaps or crowds the main metrics
-- the renderer handles missing or long strings without visibly breaking the layout
+- the renderer handles missing, long, or malformed strings without visibly breaking the layout or panicking the route
 - the output format is updated consistently if PNG is adopted
 - a local dummy image can be generated for visual review after implementation
