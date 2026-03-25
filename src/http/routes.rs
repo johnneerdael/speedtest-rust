@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use std::sync::Arc;
 
+#[cfg(test)]
 use ab_glyph::FontRef;
 use tokio::sync::Mutex;
 

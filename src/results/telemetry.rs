@@ -857,6 +857,34 @@ pub fn draw_result(data: &TelemetryData) -> Vec<u8> {
     buffer.into_inner()
 }
 
+fn ensure_result_font() {
+    FONT.get_or_init(|| {
+        FontRef::try_from_slice(include_bytes!("../../assets/open-sans.ttf")).unwrap()
+    });
+}
+
+fn sample_result_data() -> TelemetryData {
+    TelemetryData {
+        ip_address: "2001:db8::42".to_string(),
+        isp_info: r#"{"processedString":"Nexio Fiber","rawIspInfo":{"ip":"2001:db8::42","hostname":"example","city":"Amsterdam","region":"Noord-Holland","country":"NL","loc":"","org":"Nexio","postal":"","timezone":"","readme":null}}"#.to_string(),
+        extra: r#"{"server":"Amsterdam Edge 1"}"#.to_string(),
+        user_agent: "sample-generator".to_string(),
+        lang: "en-US".to_string(),
+        download: "874.48".to_string(),
+        upload: "609.27".to_string(),
+        ping: "7.0".to_string(),
+        jitter: "29.0".to_string(),
+        log: "".to_string(),
+        uuid: "sample-result".to_string(),
+        timestamp: 1_774_420_740_000,
+    }
+}
+
+pub fn write_sample_result(path: &str) -> std::io::Result<()> {
+    ensure_result_font();
+    std::fs::write(path, draw_result(&sample_result_data()))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

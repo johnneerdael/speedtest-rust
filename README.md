@@ -53,6 +53,14 @@ Compatible with all librespeed clients :
 This project can be much better.\
 Therefore, your PRs are accepted to improve and solve problems
 
+## Developer
+
+Generate a sample telemetry result card without starting the server:
+
+```bash
+cargo run -- --generate-sample-result /tmp/result-card-sample.png
+```
+
 ## License
 Copyright (C) 2016-2024 Federico Dossena\
 Copyright (C) 2024-2026 Sudo Dios
