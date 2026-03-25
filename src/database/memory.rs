@@ -1,18 +1,18 @@
-use std::collections::HashMap;
 use crate::database::Database;
 use crate::results::TelemetryData;
+use std::collections::HashMap;
 
 pub struct MemoryDB {
-    pub records : HashMap<String,TelemetryData>
+    pub records: HashMap<String, TelemetryData>,
 }
 
-pub fn init() -> HashMap<String,TelemetryData> {
+pub fn init() -> HashMap<String, TelemetryData> {
     HashMap::new()
 }
 
 impl Database for MemoryDB {
     fn insert(&mut self, data: TelemetryData) -> std::io::Result<()> {
-        self.records.insert(data.uuid.clone(),data);
+        self.records.insert(data.uuid.clone(), data);
         if self.records.len() > 100 {
             if let Some(key) = self.records.keys().next().cloned() {
                 self.records.remove(&key);
@@ -26,7 +26,7 @@ impl Database for MemoryDB {
     }
 
     fn fetch_last_100(&mut self) -> std::io::Result<Vec<TelemetryData>> {
-        let data : Vec<TelemetryData> = self.records.values().cloned().collect();
+        let data: Vec<TelemetryData> = self.records.values().cloned().collect();
         Ok(data)
     }
 }

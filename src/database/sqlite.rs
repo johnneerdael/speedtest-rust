@@ -1,17 +1,15 @@
-use std::io::Error;
-use rusqlite::{Connection, Row};
-use crate::database::{Database, DBRawToStruct};
+use crate::database::{DBRawToStruct, Database};
 use crate::results::TelemetryData;
+use rusqlite::{Connection, Row};
+use std::io::Error;
 
 pub struct SQLite {
     pub connection: Connection,
 }
 
-pub fn init (database_file : &Option<String>) -> std::io::Result<Connection> {
+pub fn init(database_file: &Option<String>) -> std::io::Result<Connection> {
     match database_file {
-        None => {
-            Err(Error::other("Error setup sqlite invalid database file."))
-        }
+        None => Err(Error::other("Error setup sqlite invalid database file.")),
         Some(database_file) => {
             let connection = Connection::open(database_file);
             match connection {
@@ -35,24 +33,18 @@ pub fn init (database_file : &Option<String>) -> std::io::Result<Connection> {
                         (),
                     );
                     match create_table {
-                        Ok(_) => {
-                            Ok(connection)
-                        }
-                        Err(e) => {
-                            Err(Error::other(format!("Error setup sqlite {:?}",e)))
-                        }
+                        Ok(_) => Ok(connection),
+                        Err(e) => Err(Error::other(format!("Error setup sqlite {:?}", e))),
                     }
                 }
-                Err(e) => {
-                    Err(Error::other(format!("Error setup sqlite {:?}",e)))
-                }
+                Err(e) => Err(Error::other(format!("Error setup sqlite {:?}", e))),
             }
         }
     }
 }
 
 impl DBRawToStruct<rusqlite::Error> for Row<'_> {
-    fn to_telemetry_struct(&self) -> Result<TelemetryData,rusqlite::Error> {
+    fn to_telemetry_struct(&self) -> Result<TelemetryData, rusqlite::Error> {
         Ok(TelemetryData {
             ip_address: self.get(1)?,
             isp_info: self.get(2)?,
@@ -79,53 +71,43 @@ impl Database for SQLite {
                                              (&data.ip_address, &data.isp_info, &data.extra, &data.user_agent, &data.lang, &data.download, &data.upload, &data.ping, &data.jitter, &data.log, &data.uuid, &data.timestamp));
         drop(data);
         match insert {
-            Ok(_) => {
-                Ok(())
-            }
-            Err(e) => {
-                Err(Error::other(format!("Error insert sqlite {:?}", e)))
-            }
+            Ok(_) => Ok(()),
+            Err(e) => Err(Error::other(format!("Error insert sqlite {:?}", e))),
         }
     }
 
     fn fetch_by_uuid(&mut self, uuid: &str) -> std::io::Result<Option<TelemetryData>> {
-        let select = self.connection.prepare("SELECT * FROM speedtest_users WHERE uuid=?1");
+        let select = self
+            .connection
+            .prepare("SELECT * FROM speedtest_users WHERE uuid=?1");
         match select {
             Ok(mut select) => {
                 let item = select.query_row([uuid], |row| row.to_telemetry_struct());
                 match item {
-                    Ok(item) => {
-                        Ok(Some(item))
-                    }
-                    Err(_) => {
-                        Ok(None)
-                    }
+                    Ok(item) => Ok(Some(item)),
+                    Err(_) => Ok(None),
                 }
             }
-            Err(e) => {
-                Err(Error::other(format!("Error select sqlite {:?}", e)))
-            }
+            Err(e) => Err(Error::other(format!("Error select sqlite {:?}", e))),
         }
     }
 
     fn fetch_last_100(&mut self) -> std::io::Result<Vec<TelemetryData>> {
-        let select = self.connection.prepare("SELECT * FROM speedtest_users ORDER BY timestamp DESC LIMIT 100");
+        let select = self
+            .connection
+            .prepare("SELECT * FROM speedtest_users ORDER BY timestamp DESC LIMIT 100");
         match select {
             Ok(mut select) => {
-                let items = select.query_map([], |row| { row.to_telemetry_struct() });
+                let items = select.query_map([], |row| row.to_telemetry_struct());
                 match items {
                     Ok(items) => {
                         let result: Vec<TelemetryData> = items.map(|row| row.unwrap()).collect();
                         Ok(result)
                     }
-                    Err(_) => {
-                        Ok(Vec::new())
-                    }
+                    Err(_) => Ok(Vec::new()),
                 }
             }
-            Err(e) => {
-                Err(Error::other(format!("Error select sqlite {:?}", e)))
-            }
+            Err(e) => Err(Error::other(format!("Error select sqlite {:?}", e))),
         }
     }
 }

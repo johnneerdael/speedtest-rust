@@ -1,22 +1,34 @@
-use std::io::Error;
-use mysql::{Conn, Row};
-use mysql::prelude::Queryable;
-use crate::database::{Database, DBRawToStruct};
+use crate::database::{DBRawToStruct, Database};
 use crate::results::TelemetryData;
+use mysql::prelude::Queryable;
+use mysql::{Conn, Row};
+use std::io::Error;
 
 pub struct MySql {
-    pub connection : String
+    pub connection: String,
 }
 
-pub fn init (username : &Option<String>,password : &Option<String>,host_name : &Option<String>,db_name : &Option<String>) -> std::io::Result<String> {
+pub fn init(
+    username: &Option<String>,
+    password: &Option<String>,
+    host_name: &Option<String>,
+    db_name: &Option<String>,
+) -> std::io::Result<String> {
     if username.is_none() || password.is_none() || host_name.is_none() || db_name.is_none() {
         Err(Error::other("Error mysql initialize parameters."))
     } else {
-        let conn_url = format!("mysql://{}:{}@{}/{}",username.clone().unwrap(),password.clone().unwrap(),host_name.clone().unwrap(),db_name.clone().unwrap());
+        let conn_url = format!(
+            "mysql://{}:{}@{}/{}",
+            username.clone().unwrap(),
+            password.clone().unwrap(),
+            host_name.clone().unwrap(),
+            db_name.clone().unwrap()
+        );
         let connection = Conn::new(conn_url.as_str());
         match connection {
             Ok(mut connection) => {
-                let create_table = connection.exec_drop("CREATE TABLE IF NOT EXISTS speedtest_users (\
+                let create_table = connection.exec_drop(
+                    "CREATE TABLE IF NOT EXISTS speedtest_users (\
                                     id integer NOT NULL PRIMARY KEY AUTO_INCREMENT,\
                                     ip_address text NOT NULL,\
                                     isp_info text,\
@@ -30,28 +42,26 @@ pub fn init (username : &Option<String>,password : &Option<String>,host_name : &
                                     log text,\
                                     uuid text,\
                                     `timestamp` bigint\
-                                )",());
+                                )",
+                    (),
+                );
                 match create_table {
                     Ok(_) => {
                         drop(connection);
                         Ok(conn_url)
                     }
-                    Err(e) => {
-                        Err(Error::other(format!("Error setup mysql {:?}",e)))
-                    }
+                    Err(e) => Err(Error::other(format!("Error setup mysql {:?}", e))),
                 }
             }
-            Err(e) => {
-                Err(Error::other(format!("Error setup mysql {:?}",e)))
-            }
+            Err(e) => Err(Error::other(format!("Error setup mysql {:?}", e))),
         }
     }
 }
 
 impl DBRawToStruct<Error> for Row {
-    fn to_telemetry_struct(&self) -> Result<TelemetryData,Error> {
+    fn to_telemetry_struct(&self) -> Result<TelemetryData, Error> {
         Ok(TelemetryData {
-            ip_address : self.get(1).unwrap_or("".to_string()),
+            ip_address: self.get(1).unwrap_or("".to_string()),
             isp_info: self.get(2).unwrap_or("".to_string()),
             extra: self.get(3).unwrap_or("".to_string()),
             user_agent: self.get(4).unwrap_or("".to_string()),
@@ -68,8 +78,7 @@ impl DBRawToStruct<Error> for Row {
 }
 
 impl Database for MySql {
-
-    fn insert(&mut self,data : TelemetryData) -> std::io::Result<()> {
+    fn insert(&mut self, data: TelemetryData) -> std::io::Result<()> {
         let mut connection = Conn::new(self.connection.as_str()).unwrap();
         let insert = connection.exec_drop("INSERT INTO speedtest_users \
                                                 (ip_address,isp_info,extra,user_agent,lang,download,upload,ping,jitter,log,uuid,timestamp) \
@@ -79,49 +88,43 @@ impl Database for MySql {
         drop(data);
         drop(connection);
         match insert {
-            Ok(_) => {
-                Ok(())
-            }
-            Err(e) => {
-                Err(Error::other( format!("Error insert mysql {:?}", e)))
-            }
+            Ok(_) => Ok(()),
+            Err(e) => Err(Error::other(format!("Error insert mysql {:?}", e))),
         }
     }
 
-    fn fetch_by_uuid(&mut self,uuid : &str) -> std::io::Result<Option<TelemetryData>> {
+    fn fetch_by_uuid(&mut self, uuid: &str) -> std::io::Result<Option<TelemetryData>> {
         let mut connection = Conn::new(self.connection.as_str()).unwrap();
-        let select: Result<Option<Row>, mysql::Error> = connection.exec_first("SELECT * FROM speedtest_users WHERE uuid=?",(uuid,));
+        let select: Result<Option<Row>, mysql::Error> =
+            connection.exec_first("SELECT * FROM speedtest_users WHERE uuid=?", (uuid,));
         match select {
-            Ok(item) => {
-                match item {
-                    Some(row) => {
-                        drop(connection);
-                        Ok(Some(row.to_telemetry_struct().unwrap()))
-                    }
-                    None => {
-                        Ok(None)
-                    }
+            Ok(item) => match item {
+                Some(row) => {
+                    drop(connection);
+                    Ok(Some(row.to_telemetry_struct().unwrap()))
                 }
-            }
-            Err(e) => {
-                Err(Error::other(format!("Error select mysql {:?}",e)))
-            }
+                None => Ok(None),
+            },
+            Err(e) => Err(Error::other(format!("Error select mysql {:?}", e))),
         }
     }
 
     fn fetch_last_100(&mut self) -> std::io::Result<Vec<TelemetryData>> {
         let mut connection = Conn::new(self.connection.as_str()).unwrap();
-        let select: Result<Vec<Row>, mysql::Error> = connection.exec("SELECT * FROM speedtest_users ORDER BY timestamp DESC LIMIT 100",());
+        let select: Result<Vec<Row>, mysql::Error> = connection.exec(
+            "SELECT * FROM speedtest_users ORDER BY timestamp DESC LIMIT 100",
+            (),
+        );
         match select {
             Ok(rows) => {
-                let result: Vec<TelemetryData> = rows.iter().map(|row| row.to_telemetry_struct().unwrap()).collect();
+                let result: Vec<TelemetryData> = rows
+                    .iter()
+                    .map(|row| row.to_telemetry_struct().unwrap())
+                    .collect();
                 drop(connection);
                 Ok(result)
             }
-            Err(e) => {
-                Err(Error::other(format!("Error select mysql {:?}", e)))
-            }
+            Err(e) => Err(Error::other(format!("Error select mysql {:?}", e))),
         }
     }
-
 }

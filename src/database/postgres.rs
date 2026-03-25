@@ -1,18 +1,29 @@
-use std::io::Error;
-use postgres::{Client, NoTls, Row};
-use tokio::task::block_in_place;
-use crate::database::{Database, DBRawToStruct};
+use crate::database::{DBRawToStruct, Database};
 use crate::results::TelemetryData;
+use postgres::{Client, NoTls, Row};
+use std::io::Error;
+use tokio::task::block_in_place;
 
 pub struct Postgres {
-    pub connection : Client
+    pub connection: Client,
 }
 
-pub fn init (username : &Option<String>,password : &Option<String>,host_name : &Option<String>,db_name : &Option<String>) -> std::io::Result<Client> {
+pub fn init(
+    username: &Option<String>,
+    password: &Option<String>,
+    host_name: &Option<String>,
+    db_name: &Option<String>,
+) -> std::io::Result<Client> {
     if username.is_none() || password.is_none() || host_name.is_none() || db_name.is_none() {
         Err(Error::other("Error postgres initialize parameters."))
     } else {
-        let conn_url = format!("postgresql://{}:{}@{}/{}",username.clone().unwrap(),password.clone().unwrap(),host_name.clone().unwrap(),db_name.clone().unwrap());
+        let conn_url = format!(
+            "postgresql://{}:{}@{}/{}",
+            username.clone().unwrap(),
+            password.clone().unwrap(),
+            host_name.clone().unwrap(),
+            db_name.clone().unwrap()
+        );
         block_in_place(|| {
             let client = Client::connect(&conn_url, NoTls);
             match client {
@@ -33,20 +44,16 @@ pub fn init (username : &Option<String>,password : &Option<String>,host_name : &
                             log text,\
                             uuid text,\
                             \"timestamp\" bigint\
-                            )",&[])
+                            )",
+                            &[],
+                        )
                     });
                     match create_table {
-                        Ok(_) => {
-                            Ok(client)
-                        }
-                        Err(e) => {
-                            Err(Error::other(format!("Error setup postgres {:?}",e)))
-                        }
+                        Ok(_) => Ok(client),
+                        Err(e) => Err(Error::other(format!("Error setup postgres {:?}", e))),
                     }
                 }
-                Err(e) => {
-                    Err(Error::other(format!("Error setup postgres {:?}",e)))
-                }
+                Err(e) => Err(Error::other(format!("Error setup postgres {:?}", e))),
             }
         })
     }
@@ -72,7 +79,7 @@ impl DBRawToStruct<Error> for Row {
 }
 
 impl Database for Postgres {
-    fn insert(&mut self,data : TelemetryData) -> std::io::Result<()> {
+    fn insert(&mut self, data: TelemetryData) -> std::io::Result<()> {
         let insert = block_in_place(|| {
             self.connection.execute("INSERT INTO speedtest_users \
                                                 (ip_address,isp_info,extra,user_agent,lang,download,upload,ping,jitter,log,uuid,timestamp) \
@@ -82,39 +89,38 @@ impl Database for Postgres {
         });
         drop(data);
         match insert {
-            Ok(_) => {
-                Ok(())
-            }
-            Err(e) => {
-                Err(Error::other(format!("Error insert postgres {:?}", e)))
-            }
+            Ok(_) => Ok(()),
+            Err(e) => Err(Error::other(format!("Error insert postgres {:?}", e))),
         }
     }
-    fn fetch_by_uuid(&mut self,uuid : &str) -> std::io::Result<Option<TelemetryData>> {
+    fn fetch_by_uuid(&mut self, uuid: &str) -> std::io::Result<Option<TelemetryData>> {
         let row = block_in_place(|| {
-            self.connection.query_one("SELECT * FROM speedtest_users WHERE uuid=$1",&[&uuid.to_string()])
+            self.connection.query_one(
+                "SELECT * FROM speedtest_users WHERE uuid=$1",
+                &[&uuid.to_string()],
+            )
         });
         match row {
-            Ok(row) => {
-                Ok(Some(row.to_telemetry_struct().unwrap()))
-            }
-            Err(e) => {
-                Err(Error::other(format!("Error select postgres {:?}", e)))
-            }
+            Ok(row) => Ok(Some(row.to_telemetry_struct().unwrap())),
+            Err(e) => Err(Error::other(format!("Error select postgres {:?}", e))),
         }
     }
     fn fetch_last_100(&mut self) -> std::io::Result<Vec<TelemetryData>> {
         let rows = block_in_place(|| {
-            self.connection.query("SELECT * FROM speedtest_users ORDER BY timestamp DESC LIMIT 100",&[])
+            self.connection.query(
+                "SELECT * FROM speedtest_users ORDER BY timestamp DESC LIMIT 100",
+                &[],
+            )
         });
         match rows {
             Ok(rows) => {
-                let result: Vec<TelemetryData> = rows.iter().map(|row| { row.to_telemetry_struct().unwrap() }).collect();
+                let result: Vec<TelemetryData> = rows
+                    .iter()
+                    .map(|row| row.to_telemetry_struct().unwrap())
+                    .collect();
                 Ok(result)
             }
-            Err(e) => {
-                Err(Error::other(format!("Error select postgres {:?}", e)))
-            }
+            Err(e) => Err(Error::other(format!("Error select postgres {:?}", e))),
         }
     }
 }

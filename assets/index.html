@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <link rel="shortcut icon" href="favicon.ico">
-<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, user-scalable=no" />
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
 <meta charset="UTF-8" />
 <script type="text/javascript" src="speedtest.js"></script>
 <script type="text/javascript" src="servers_list.js"></script>
@@ -59,10 +59,10 @@ function initServers(){
     }
 }
 
-const meterBk = /Trident.*rv:(\d+\.\d+)/i.test(navigator.userAgent) ? "#EAEAEA" : "#80808040";
-const dlColor = "#6060AA",
-		ulColor = "#616161";
-const progColor = meterBk;
+const meterBk = /Trident.*rv:(\d+\.\d+)/i.test(navigator.userAgent) ? "#EAEAEA" : "rgba(255, 255, 255, 0.08)";
+const dlColor = "#bfa6ff",
+		ulColor = "#5adcf4";
+const progColor = "#8f68ff";
 
 //CODE FOR GAUGES
 function drawMeter(c,amount,bk,fg,progress,prog){
@@ -176,22 +176,186 @@ function initUI(){
 }
 </script>
 <style type="text/css">
+	@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap');
+	:root{
+		--surface: #0b0b0c;
+		--surface-container-lowest: #050506;
+		--surface-container-low: #101013;
+		--surface-container: #17171d;
+		--surface-variant: rgba(24, 24, 31, 0.72);
+		--surface-bright: #262633;
+		--primary: #bfa6ff;
+		--primary-dim: #8f68ff;
+		--secondary: #5adcf4;
+		--tertiary: #ffa0ba;
+		--on-surface: #ffffff;
+		--on-surface-variant: #adaaaa;
+		--outline-variant: #45445a;
+		--stroke: rgba(255, 255, 255, 0.08);
+		--shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
+	}
+	*{
+		box-sizing:border-box;
+	}
 	html,body{
-		border:none; padding:0; margin:0;
-		background:#FFFFFF;
-		color:#202020;
+		border:none;
+		padding:0;
+		margin:0;
+		min-height:100%;
+		background:
+			radial-gradient(circle at top, rgba(191, 166, 255, 0.12), transparent 36%),
+			radial-gradient(circle at 20% 20%, rgba(90, 220, 244, 0.08), transparent 28%),
+			linear-gradient(180deg, #040405 0%, var(--surface) 42%, var(--surface-container-lowest) 100%);
+		color:var(--on-surface);
 	}
 	body{
 		text-align:center;
-		font-family:"Roboto",sans-serif;
+		font-family:"Inter",sans-serif;
+		-webkit-font-smoothing:antialiased;
+		text-rendering:optimizeLegibility;
+		color-scheme:dark;
+		background-attachment:fixed;
+		color:var(--on-surface);
+		overflow-x:hidden;
 	}
-	h1{
-		color:#404040;
+	a{
+		color:inherit;
+	}
+	.portal-page{
+		position:relative;
+		min-height:100vh;
+		padding:1.5rem 1rem 2.5rem;
+	}
+	.portal-aurora{
+		position:fixed;
+		inset:-20vh -10vw auto;
+		height:55vh;
+		pointer-events:none;
+		background:
+			radial-gradient(circle at 20% 35%, rgba(191, 166, 255, 0.24), transparent 32%),
+			radial-gradient(circle at 80% 30%, rgba(90, 220, 244, 0.16), transparent 28%),
+			radial-gradient(circle at 50% 60%, rgba(255, 160, 186, 0.12), transparent 30%);
+		filter:blur(32px);
+		opacity:0.8;
+	}
+	.portal-shell{
+		position:relative;
+		z-index:1;
+		width:min(72rem, 100%);
+		margin:0 auto;
+		display:flex;
+		flex-direction:column;
+		gap:1rem;
+	}
+	.glass,
+	.surface{
+		border:1px solid var(--stroke);
+		border-radius:28px;
+		box-shadow:var(--shadow);
+		backdrop-filter:blur(18px);
+	}
+	.glass{
+		background:linear-gradient(180deg, rgba(255,255,255,0.09), rgba(255,255,255,0.04));
+	}
+	.surface{
+		background:var(--surface-container-low);
+	}
+	.portal-header{
+		display:flex;
+		align-items:flex-start;
+		justify-content:space-between;
+		gap:1.5rem;
+		padding:1.2rem 1.4rem;
+		text-align:left;
+	}
+	.portal-brand{
+		display:flex;
+		align-items:center;
+		gap:1rem;
+		min-width:0;
+	}
+	.portal-mark{
+		width:3rem;
+		height:3rem;
+		border-radius:1rem;
+		display:grid;
+		place-items:center;
+		background:linear-gradient(135deg, var(--primary), var(--secondary));
+		color:#060608;
+		font-family:"Manrope","Inter",sans-serif;
+		font-weight:900;
+		letter-spacing:-0.04em;
+		flex:0 0 auto;
+		box-shadow:0 18px 30px rgba(0,0,0,0.2);
+	}
+	.portal-brand-copy{
+		min-width:0;
+	}
+	.badge{
+		display:inline-flex;
+		align-items:center;
+		padding:0.35rem 0.7rem;
+		border-radius:999px;
+		background:rgba(191, 166, 255, 0.12);
+		border:1px solid rgba(191, 166, 255, 0.28);
+		color:var(--primary);
+		font-size:0.72rem;
+		font-weight:700;
+		letter-spacing:0.16em;
+		text-transform:uppercase;
+	}
+	.section-title{
+		color:var(--on-surface);
+		font-family:"Manrope","Inter",sans-serif;
+		font-weight:800;
+		letter-spacing:-0.03em;
+		margin:0;
+	}
+	.portal-title{
+		font-size:clamp(2rem, 4vw, 3rem);
+	}
+	.portal-policy-title{
+		font-size:clamp(1.6rem, 2.6vw, 2.25rem);
+	}
+	.portal-subtitle{
+		margin:0.55rem 0 0;
+		color:var(--on-surface-variant);
+		font-size:0.96rem;
+		line-height:1.6;
+		max-width:38rem;
+	}
+	.portal-links{
+		display:flex;
+		align-items:center;
+		gap:0.75rem;
+		flex-wrap:wrap;
+		justify-content:flex-end;
+	}
+	.portal-link{
+		color:var(--secondary);
+		text-decoration:none;
+		font-size:0.95rem;
+	}
+	.portal-link:hover{
+		text-decoration:underline;
+	}
+	#loading,
+	#testWrapper,
+	#shareArea,
+	#privacyPolicy{
+		transition:background-color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
 	}
 	#loading{
-		background-color:#FFFFFF;
-		color:#404040;
-		text-align:center;
+		width:min(40rem, 100%);
+		margin:0 auto;
+		padding:1.25rem 1.5rem;
+		text-align:left;
+		min-width:0;
+	}
+	.portal-loading-row{
+		display:flex;
+		align-items:center;
+		gap:0.85rem;
 	}
 	span.loadCircle{
 		display:inline-block;
@@ -207,27 +371,55 @@ function initUI(){
 		0%{transform:rotate(0deg);}
 		100%{transform:rotate(359deg);}
 	}
+	.portal-status-copy{
+		display:flex;
+		flex-direction:column;
+		gap:0.2rem;
+	}
+	.portal-status-copy strong{
+		font-family:"Manrope","Inter",sans-serif;
+		font-size:1.02rem;
+	}
+	.portal-status-copy span{
+		color:var(--on-surface-variant);
+		font-size:0.94rem;
+	}
 	#startStopBtn{
-		display:inline-block;
+		display:inline-flex;
+		align-items:center;
+		justify-content:center;
 		margin:0 auto;
-		color:#6060AA;
-		background-color:rgba(0,0,0,0);
-		border:0.15em solid #6060FF;
-		border-radius:0.3em;
-		transition:all 0.3s;
-		box-sizing:border-box;
-		width:8em; height:3em;
-		line-height:2.7em;
+		color:var(--on-surface);
+		background:linear-gradient(180deg, rgba(191,166,255,0.12), rgba(143,104,255,0.04));
+		border:1px solid rgba(191,166,255,0.45);
+		border-radius:999px;
+		transition:all 0.3s ease;
+		width:min(8.5rem, 100%);
+		min-height:44px;
+		padding:0 1.25rem;
+		line-height:1;
 		cursor:pointer;
-		box-shadow: 0 0 0 rgba(0,0,0,0.1), inset 0 0 0 rgba(0,0,0,0.1);
+		box-shadow:0 12px 30px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.08);
+		font-family:"Manrope","Inter",sans-serif;
+		font-weight:700;
 	}
 	#startStopBtn:hover{
-		box-shadow: 0 0 2em rgba(0,0,0,0.1), inset 0 0 1em rgba(0,0,0,0.1);
+		box-shadow:0 18px 36px rgba(0,0,0,0.28), 0 0 0 1px rgba(191,166,255,0.2), inset 0 1px 0 rgba(255,255,255,0.12);
+		transform:translateY(-1px);
+	}
+	#startStopBtn:focus-visible{
+		outline:2px solid rgba(90,220,244,0.95);
+		outline-offset:3px;
+		box-shadow:0 0 0 4px rgba(90,220,244,0.18), 0 18px 36px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.12);
+	}
+	#startStopBtn.running:hover{
+		box-shadow:0 18px 36px rgba(0,0,0,0.28), 0 0 0 1px rgba(255,160,186,0.22), inset 0 1px 0 rgba(255,255,255,0.12);
+		transform:translateY(-1px);
 	}
 	#startStopBtn.running{
-		background-color:#FF3030;
-		border-color:#FF6060;
-		color:#FFFFFF;
+		background:linear-gradient(180deg, rgba(255,160,186,0.2), rgba(255,48,48,0.28));
+		border-color:rgba(255,160,186,0.7);
+		color:var(--on-surface);
 	}
 	#startStopBtn:before{
 		content:"Start";
@@ -235,87 +427,198 @@ function initUI(){
 	#startStopBtn.running:before{
 		content:"Abort";
 	}
+	.portal-grid{
+		display:grid;
+		gap:1rem;
+	}
+	.portal-control-panel{
+		display:flex;
+		flex-wrap:wrap;
+		align-items:center;
+		justify-content:space-between;
+		gap:1rem;
+		padding:1rem 1.2rem;
+	}
+	.portal-control-stack{
+		display:flex;
+		align-items:center;
+		gap:0.9rem;
+		flex-wrap:wrap;
+		text-align:left;
+		min-width:0;
+	}
+	.portal-control-label{
+		display:flex;
+		flex-direction:column;
+		gap:0.35rem;
+		color:var(--on-surface-variant);
+		font-size:0.92rem;
+		min-width:0;
+	}
 	#serverArea{
-		margin-top:1em;
+		margin-top:0;
+		min-width:0;
 	}
 	#server{
 		font-size:1em;
-		padding:0.2em;
+		min-height:44px;
+		padding:0.65rem 0.85rem;
+		background:var(--surface-container);
+		color:var(--on-surface);
+		border:1px solid var(--outline-variant);
+		border-radius:14px;
+		min-width:min(24rem, 100%);
+		max-width:100%;
 	}
 	#test{
-		margin-top:2em;
-		margin-bottom:12em;
+		margin-top:0;
+		margin-bottom:0;
+		display:grid;
+		gap:1rem;
 	}
 	div.testArea{
 		display:inline-block;
-		width:16em;
+		width:min(100%, 17rem);
 		height:12.5em;
 		position:relative;
-		box-sizing:border-box;
+		background:linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+		border:1px solid var(--stroke);
+		border-radius:24px;
+		padding-top:1.2em;
+		margin:0;
 	}
 	div.testArea2{
 		display:inline-block;
-		width:14em;
+		width:min(100%, 14rem);
 		height:7em;
 		position:relative;
-		box-sizing:border-box;
 		text-align:center;
+		background:linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+		border:1px solid var(--stroke);
+		border-radius:20px;
+		padding-top:0.9em;
+		margin:0;
 	}
 	div.testArea div.testName{
 		position:absolute;
-		top:0.1em; left:0;
+		top:0.1em;
+		left:0;
 		width:100%;
 		font-size:1.4em;
 		z-index:9;
+		color:var(--on-surface);
+		font-family:"Manrope","Inter",sans-serif;
+		font-weight:700;
 	}
 	div.testArea2 div.testName{
         display:block;
         text-align:center;
         font-size:1.4em;
+		color:var(--on-surface);
+		font-family:"Manrope","Inter",sans-serif;
+		font-weight:700;
 	}
 	div.testArea div.meterText{
 		position:absolute;
-		bottom:1.55em; left:0;
+		bottom:1.55em;
+		left:0;
 		width:100%;
 		font-size:2.5em;
 		z-index:9;
+		color:var(--on-surface);
+		font-family:"Manrope","Inter",sans-serif;
+		font-weight:800;
+		letter-spacing:-0.04em;
 	}
 	div.testArea2 div.meterText{
         display:inline-block;
         font-size:2.5em;
+		color:var(--on-surface);
+		font-family:"Manrope","Inter",sans-serif;
+		font-weight:800;
+		letter-spacing:-0.04em;
 	}
 	div.meterText:empty:before{
 		content:"0.00";
 	}
 	div.testArea div.unit{
 		position:absolute;
-		bottom:2em; left:0;
+		bottom:2em;
+		left:0;
 		width:100%;
 		z-index:9;
+		color:var(--on-surface-variant);
 	}
 	div.testArea2 div.unit{
 		display:inline-block;
+		color:var(--on-surface-variant);
 	}
 	div.testArea canvas{
 		position:absolute;
-		top:0; left:0; width:100%; height:100%;
+		top:0;
+		left:0;
+		width:100%;
+		height:100%;
 		z-index:1;
 	}
 	div.testGroup{
-		display:block;
-        margin: 0 auto;
+		display:flex;
+		flex-wrap:wrap;
+		justify-content:center;
+		gap:1rem;
+		margin:0 auto;
+		width:100%;
 	}
 	#shareArea{
 		width:95%;
 		max-width:40em;
 		margin:0 auto;
-		margin-top:2em;
+		padding:1.25rem 1.5rem;
+		text-align:left;
+		display:grid;
+		gap:0.9rem;
+		min-width:0;
+		overflow-wrap:anywhere;
 	}
 	#shareArea > *{
-		display:block;
+		margin:0;
+		min-width:0;
+	}
+	#shareArea h3,
+	#shareArea p,
+	#shareArea span,
+	#shareArea label,
+	#shareArea a{
+		color:var(--on-surface);
+	}
+	#shareArea p,
+	#privacyPolicy p,
+	#privacyPolicy li{
+		line-height:1.6;
+	}
+	.share-title{
+		display:flex;
+		align-items:center;
+		gap:0.6rem;
+		font-family:"Manrope","Inter",sans-serif;
+		font-weight:800;
+		font-size:1.1rem;
+	}
+	#resultsURL{
 		width:100%;
+		background:var(--surface-container-low);
+		color:var(--on-surface);
+		border:1px solid var(--outline-variant);
+		border-radius:12px;
+		padding:0.75rem 0.9rem;
+	}
+	.results-preview{
+		width:min(100%, 18rem);
+		max-width:18rem;
+		border-radius:18px;
+		border:1px solid var(--stroke);
+		background:rgba(255,255,255,0.03);
 		height:auto;
-		margin: 0.25em 0;
 	}
 	#privacyPolicy{
         position:fixed;
@@ -326,29 +629,168 @@ function initUI(){
         overflow-y:auto;
         width:auto;
         height:auto;
-        box-shadow:0 0 3em 1em #000000;
+        box-shadow:var(--shadow);
         z-index:999999;
         text-align:left;
-        background-color:#FFFFFF;
-        padding:1em;
+        background:var(--surface-container-low);
+        padding:1.25rem;
+		color:var(--on-surface);
+		border:1px solid var(--stroke);
+		border-radius:24px;
+		backdrop-filter:blur(18px);
+		min-width:0;
+		overflow-y:auto;
+		overscroll-behavior:contain;
+		-webkit-overflow-scrolling:touch;
+		max-height:calc(100dvh - 4em);
+	}
+	#privacyPolicy h2,
+	#privacyPolicy h4{
+		font-family:"Manrope","Inter",sans-serif;
+		letter-spacing:-0.02em;
+	}
+	#privacyPolicy a,
+	#shareArea a{
+		color:var(--secondary);
+	}
+	#privacyPolicy ul{
+		margin-top:0.5rem;
+		line-height:1.6;
 	}
 	a.privacy{
+        display:inline-flex;
+        align-items:center;
+        justify-content:center;
+        min-height:44px;
         text-align:center;
-        font-size:0.8em;
-        color:#808080;
-        padding: 0 3em;
+        font-size:0.9rem;
+        color:var(--on-surface-variant);
+        padding:0 1rem;
+        border-radius:999px;
 	}
     div.closePrivacyPolicy {
-        width: 100%;
-        text-align: center;
+        width:100%;
+        text-align:center;
     }
     div.closePrivacyPolicy a.privacy {
-        padding: 1em 3em;
+        padding:0 1.5rem;
     }
-	@media all and (max-width:40em){
-		body{
-			font-size:0.8em;
+	/* Explicit 360px target for the minimum portal viewport. */
+	@media all and (max-width:360px){
+		.portal-page{
+			padding:0.5rem 0.35rem 1rem;
 		}
+		.portal-header,
+		.portal-control-panel,
+		#loading,
+		#shareArea,
+		#privacyPolicy{
+			padding:0.875rem;
+		}
+		.portal-header{
+			flex-direction:column;
+			gap:1rem;
+		}
+		.portal-links{
+			justify-content:flex-start;
+			width:100%;
+		}
+		.portal-control-panel{
+			flex-direction:column;
+			align-items:stretch;
+		}
+		.portal-control-stack{
+			width:100%;
+			flex-direction:column;
+			align-items:stretch;
+			gap:0.65rem;
+		}
+		#startStopBtn,
+		a.privacy{
+			width:100%;
+			max-width:none;
+		}
+		#server{
+			width:100%;
+			min-width:0;
+		}
+		#shareArea{
+			width:100%;
+		}
+		#privacyPolicy{
+			top:0.5rem;
+			right:0.5rem;
+			bottom:0.5rem;
+			left:0.5rem;
+			max-height:calc(100dvh - 1rem);
+		}
+		div.testGroup{
+			gap:0.75rem;
+		}
+		div.testArea,
+		div.testArea2{
+			width:100%;
+		}
+	}
+	@media all and (max-width:40em){
+		.portal-page{
+			padding:0.75rem 0.5rem 1.5rem;
+		}
+		.portal-header,
+		.portal-control-panel,
+		#loading,
+		#shareArea{
+			padding:1rem;
+		}
+		.portal-header{
+			flex-direction:column;
+		}
+		.portal-links{
+			justify-content:flex-start;
+			width:100%;
+		}
+		.portal-control-panel{
+			align-items:stretch;
+		}
+		.portal-control-stack{
+			width:100%;
+		}
+		div.testArea,
+		div.testArea2{
+			width:min(100%, 18rem);
+		}
+		#privacyPolicy{
+			top:1rem;
+			left:1rem;
+			right:1rem;
+			bottom:1rem;
+		}
+	}
+	#testWrapper{
+		width:100%;
+		margin:0 auto;
+	}
+	#testWrapper > a,
+	#testWrapper > a:visited,
+	#testWrapper > a:hover{
+		color:var(--secondary);
+	}
+	#serverArea,
+	#ipArea{
+		color:var(--on-surface-variant);
+	}
+	#ip{
+		color:var(--primary);
+	}
+	#pingText,
+	#jitText{
+		color:var(--tertiary) !important;
+	}
+	#dlText{
+		color:var(--primary) !important;
+	}
+	#ulText{
+		color:var(--secondary) !important;
 	}
 	div.visible{
 		animation: fadeIn 0.4s;
@@ -377,98 +819,129 @@ function initUI(){
 		}
 	}
 </style>
-<title>LibreSpeed Example</title>
+<title>Speedtest NexioApp</title>
 </head>
 <body onload="initServers()">
-<h1>LibreSpeed Example</h1>
-<div id="loading" class="visible">
-	<p id="message"><span class="loadCircle"></span>Selecting a server...</p>
-</div>
-<div id="testWrapper" class="hidden">
-	<div id="startStopBtn" onclick="startStop()"></div><br/>
-	<a class="privacy" href="#" onclick="I('privacyPolicy').style.display=''">Privacy</a>
-	<div id="serverArea">
-		Server: <select id="server" onchange="s.setSelectedServer(SPEEDTEST_SERVERS[this.value])"></select>
+<div class="portal-page">
+	<div class="portal-aurora" aria-hidden="true"></div>
+	<div class="portal-shell">
+		<header class="glass portal-header">
+			<div class="portal-brand">
+				<div class="portal-mark">L</div>
+				<div class="portal-brand-copy">
+					<span class="badge">LibreSpeed</span>
+					<h1 class="section-title portal-title">Speedtest NexioApp</h1>
+					<p class="portal-subtitle">A portal-style speed test shell with the original LibreSpeed controls, meters, and result sharing flow intact.</p>
+				</div>
+			</div>
+			<div class="portal-links">
+				<a class="privacy portal-link" href="#" onclick="I('privacyPolicy').style.display='';return false;">Privacy</a>
+			</div>
+		</header>
+		<div id="loading" class="visible glass">
+			<div class="portal-loading-row">
+				<span class="loadCircle"></span>
+				<div class="portal-status-copy">
+					<strong>Preparing test environment</strong>
+					<span id="message">Selecting a server...</span>
+				</div>
+			</div>
+		</div>
+		<div id="testWrapper" class="hidden">
+	<div class="portal-grid">
+				<section class="surface portal-control-panel">
+					<div class="portal-control-stack">
+						<div id="startStopBtn" role="button" tabindex="0" aria-label="Start or abort speed test" onclick="startStop()" onkeydown="if(event.key==='Enter'||event.key===' '||event.key==='Spacebar'){event.preventDefault();startStop();}"></div>
+						<a class="privacy portal-link" href="#" onclick="I('privacyPolicy').style.display='';return false;">Privacy</a>
+					</div>
+					<div class="portal-control-stack">
+						<div class="portal-control-label">
+							<span class="badge">Server</span>
+							<div id="serverArea">
+								Server: <select id="server" onchange="s.setSelectedServer(SPEEDTEST_SERVERS[this.value])"></select>
+							</div>
+						</div>
+					</div>
+				</section>
+				<section id="test" class="portal-grid">
+					<div class="testGroup">
+						<div class="surface testArea2">
+							<div class="testName">Ping</div>
+							<div id="pingText" class="meterText"></div>
+							<div class="unit">ms</div>
+						</div>
+						<div class="surface testArea2">
+							<div class="testName">Jitter</div>
+							<div id="jitText" class="meterText"></div>
+							<div class="unit">ms</div>
+						</div>
+					</div>
+					<div class="testGroup">
+						<div class="surface testArea">
+							<div class="testName">Download</div>
+							<canvas id="dlMeter" class="meter"></canvas>
+							<div id="dlText" class="meterText"></div>
+							<div class="unit">Mbps</div>
+						</div>
+						<div class="surface testArea">
+							<div class="testName">Upload</div>
+							<canvas id="ulMeter" class="meter"></canvas>
+							<div id="ulText" class="meterText"></div>
+							<div class="unit">Mbps</div>
+						</div>
+					</div>
+					<div id="ipArea" class="surface portal-control-panel">
+						<span class="badge">Client IP</span>
+						<span id="ip"></span>
+					</div>
+					<div id="shareArea" class="surface" style="display:none">
+						<div class="share-title">Share results</div>
+						<p>Test ID: <span id="testId"></span></p>
+						<input type="text" value="" id="resultsURL" readonly="readonly" onclick="this.select();this.focus();this.select();document.execCommand('copy');alert('Link copied')"/>
+						<img src="" id="resultsImg" class="results-preview" />
+					</div>
+				</section>
+			</div>
+		</div>
+		<div id="privacyPolicy" class="surface" style="display:none">
+		    <span class="badge">Privacy Policy</span>
+		    <h2 class="section-title portal-policy-title">Privacy Policy</h2>
+		    <p>This HTML5 Speedtest server is configured with telemetry enabled.</p>
+		    <h4>What data we collect</h4>
+		    <p>At the end of the test, the following data is collected and stored:</p>
+		    <ul>
+		        <li>Test ID</li>
+		        <li>Time of testing</li>
+		        <li>Test results (download and upload speed, ping and jitter)</li>
+		        <li>IP address</li>
+		        <li>ISP information</li>
+		        <li>Approximate location (inferred from IP address, not GPS)</li>
+		        <li>User agent and browser locale</li>
+		        <li>Test log (contains no personal information)</li>
+		    </ul>
+		    <h4>How we use the data</h4>
+		    <p>Data collected through this service is used to:</p>
+		    <ul>
+		        <li>Allow sharing of test results (sharable image for forums, etc.)</li>
+		        <li>To improve the service offered to you (for instance, to detect problems on our side)</li>
+		    </ul>
+		    <p>No personal information is disclosed to third parties.</p>
+		    <h4>Your consent</h4>
+		    <p>
+		        By starting the test, you consent to the terms of this privacy policy.
+		    </p>
+		    <h4>Data removal</h4>
+		    <p>
+		        If you want to have your information deleted, you need to provide either the ID of the test or your IP address. This is the only way to identify your data, without this information we won't be able to comply with your request.<br/><br/>
+		        Contact this email address for all deletion requests: <a href="mailto:john@neerdael.nl">John Neerdael</a>.
+		    </p>
+		    <br/><br/>
+		    <div class="closePrivacyPolicy">
+		        <a class="privacy" href="#" onclick="I('privacyPolicy').style.display='none';return false;">Close</a>
+		    </div>
+		    <br/>
+		</div>
 	</div>
-	<div id="test">
-		<div class="testGroup">
-            <div class="testArea2">
-				<div class="testName">Ping</div>
-				<div id="pingText" class="meterText" style="color:#AA6060"></div>
-				<div class="unit">ms</div>
-			</div>
-			<div class="testArea2">
-				<div class="testName">Jitter</div>
-				<div id="jitText" class="meterText" style="color:#AA6060"></div>
-				<div class="unit">ms</div>
-			</div>
-		</div>
-		<div class="testGroup">
-			<div class="testArea">
-				<div class="testName">Download</div>
-				<canvas id="dlMeter" class="meter"></canvas>
-				<div id="dlText" class="meterText"></div>
-				<div class="unit">Mbps</div>
-			</div>
-			<div class="testArea">
-				<div class="testName">Upload</div>
-				<canvas id="ulMeter" class="meter"></canvas>
-				<div id="ulText" class="meterText"></div>
-				<div class="unit">Mbps</div>
-			</div>
-		</div>
-		<div id="ipArea">
-			<span id="ip"></span>
-		</div>
-		<div id="shareArea" style="display:none">
-			<h3>Share results</h3>
-			<p>Test ID: <span id="testId"></span></p>
-			<input type="text" value="" id="resultsURL" readonly="readonly" onclick="this.select();this.focus();this.select();document.execCommand('copy');alert('Link copied')"/>
-			<img src="" id="resultsImg" />
-		</div>
-	</div>
-	<a href="https://github.com/librespeed/speedtest">Source code</a>
-</div>
-<div id="privacyPolicy" style="display:none">
-    <h2>Privacy Policy</h2>
-    <p>This HTML5 Speedtest server is configured with telemetry enabled.</p>
-    <h4>What data we collect</h4>
-    <p>
-        At the end of the test, the following data is collected and stored:
-        <ul>
-            <li>Test ID</li>
-            <li>Time of testing</li>
-            <li>Test results (download and upload speed, ping and jitter)</li>
-            <li>IP address</li>
-            <li>ISP information</li>
-            <li>Approximate location (inferred from IP address, not GPS)</li>
-            <li>User agent and browser locale</li>
-            <li>Test log (contains no personal information)</li>
-        </ul>
-    </p>
-    <h4>How we use the data</h4>
-    <p>
-        Data collected through this service is used to:
-        <ul>
-            <li>Allow sharing of test results (sharable image for forums, etc.)</li>
-            <li>To improve the service offered to you (for instance, to detect problems on our side)</li>
-        </ul>
-        No personal information is disclosed to third parties.
-    </p>
-    <h4>Your consent</h4>
-    <p>
-        By starting the test, you consent to the terms of this privacy policy.
-    </p>
-    <h4>Data removal</h4>
-    <p>
-        If you want to have your information deleted, you need to provide either the ID of the test or your IP address. This is the only way to identify your data, without this information we won't be able to comply with your request.<br/><br/>
-        Contact this email address for all deletion requests: <a href="mailto:PUT@YOUR_EMAIL.HERE">TO BE FILLED BY DEVELOPER</a>.
-    </p>
-    <br/><br/>
-    <div class="closePrivacyPolicy">
-        <a class="privacy" href="#" onclick="I('privacyPolicy').style.display='none'">Close</a>
-    </div>
-    <br/>
 </div>
 </body>
 </html>
