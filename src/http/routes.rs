@@ -104,6 +104,23 @@ mod tests {
         }
     }
 
+    fn valid_row() -> TelemetryData {
+        TelemetryData {
+            ip_address: "203.0.113.42".to_string(),
+            isp_info: r#"{"processedString":"Example ISP","rawIspInfo":{"ip":"203.0.113.42","hostname":"","city":"Amsterdam","region":"Noord-Holland","country":"NL","loc":"","org":"Example","postal":"","timezone":"","readme":null}}"#.to_string(),
+            extra: r#"{"server":"Amsterdam Edge 1"}"#.to_string(),
+            user_agent: "test-agent".to_string(),
+            lang: "en-US".to_string(),
+            download: "100.0".to_string(),
+            upload: "20.0".to_string(),
+            ping: "5.0".to_string(),
+            jitter: "1.0".to_string(),
+            log: "".to_string(),
+            uuid: "good-row".to_string(),
+            timestamp: 1_700_000_000,
+        }
+    }
+
     #[tokio::test]
     async fn malformed_stored_telemetry_does_not_panic_backend_results() {
         init_test_globals();
@@ -120,8 +137,26 @@ mod tests {
         assert!(response.data.starts_with(b"HTTP/1.1 200 OK"));
         assert!(response
             .data
-            .windows(b"image/jpeg".len())
-            .any(|window| window == b"image/jpeg"));
+            .windows(b"image/png".len())
+            .any(|window| window == b"image/png"));
+    }
+
+    #[tokio::test]
+    async fn show_result_route_returns_png_image_response_for_valid_telemetry() {
+        init_test_globals();
+
+        let mut database: Arc<Mutex<dyn Database + Send>> =
+            Arc::new(Mutex::new(MalformedTelemetryDb { row: valid_row() }));
+        let mut params = HashMap::new();
+        params.insert("id".to_string(), "good-row".to_string());
+
+        let response = show_result_route(&mut database, &params).await;
+
+        assert!(response.data.starts_with(b"HTTP/1.1 200 OK"));
+        assert!(response
+            .data
+            .windows(b"image/png".len())
+            .any(|window| window == b"image/png"));
     }
 }
 

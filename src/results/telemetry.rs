@@ -850,7 +850,7 @@ pub fn draw_result(data: &TelemetryData) -> Vec<u8> {
     );
 
     let mut buffer: Cursor<Vec<u8>> = Cursor::new(Vec::new());
-    if let Err(e) = img.write_to(&mut buffer, ImageFormat::Jpeg) {
+    if let Err(e) = img.write_to(&mut buffer, ImageFormat::Png) {
         error!("Image writer buffer error : {e}")
     }
 
@@ -1031,6 +1031,18 @@ mod tests {
 
         let image = image::load_from_memory(&bytes).expect("result image should decode");
         assert_eq!(image.dimensions(), (1200, 720));
+    }
+
+    #[test]
+    fn draw_result_encodes_png_bytes() {
+        init_test_globals();
+
+        let bytes = draw_result(&sample_telemetry(
+            r#"{"processedString":"Example ISP","rawIspInfo":{"ip":"203.0.113.42","hostname":"","city":"Amsterdam","region":"Noord-Holland","country":"NL","loc":"","org":"Example","postal":"","timezone":"","readme":null}}"#,
+            r#"{"server":"Amsterdam Edge 1"}"#,
+        ));
+
+        assert!(bytes.starts_with(b"\x89PNG\r\n\x1a\n"));
     }
 
     #[test]
